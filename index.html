@@ -1272,32 +1272,95 @@ function move(dx, dy) {
         if(Math.random() < 0.35) {
 
             encounterPokemon();
+function encounterPokemon() {
 
-            return;
-        }
+    /*
+    야생 포켓몬 등장 확률에 따라
+    포켓몬을 선택합니다.
+    */
 
-        else {
+    let random = Math.random();
 
-            showToast("🌿 풀숲을 지나갔습니다...");
+    let pool;
 
-        }
+    if (random < 0.65) {
+
+        pool = pokemonList.filter(function(p) {
+            return p.rarity === "흔함";
+        });
 
     }
+    else if (random < 0.90) {
 
+        pool = pokemonList.filter(function(p) {
+            return p.rarity === "보통";
+        });
+
+    }
+    else if (random < 0.985) {
+
+        pool = pokemonList.filter(function(p) {
+            return p.rarity === "희귀";
+        });
+
+    }
     else {
 
-        document.getElementById("mapInfo").textContent =
-            "🚶 탐험 중... 풀숲에 들어가면 야생 포켓몬을 만날 수 있습니다!";
+        pool = pokemonList.filter(function(p) {
+            return p.rarity === "매우 희귀" ||
+                   p.rarity === "전설급";
+        });
 
     }
 
+    /*
+    야생 포켓몬 결정
+    */
+
+    currentEnemy =
+        pool[Math.floor(Math.random() * pool.length)];
+
+    /*
+    야생 포켓몬 HP 초기화
+    */
+
+    enemyHp = currentEnemy.maxHp;
+
+    /*
+    배틀 상태
+    */
+
+    inBattle = true;
+
+    /*
+    배틀 화면으로 이동
+    */
+
+    showScreen("battleScreen");
+
+    /*
+    배틀 정보 업데이트
+    */
+
+    updateBattle();
+
+    /*
+    ⭐ 핵심 수정
+    새로운 포켓몬이 나타날 때마다
+    모든 배틀 버튼을 다시 활성화
+    */
+
+    enableBattleButtons();
+
+    /*
+    등장 메시지
+    */
+
+    document.getElementById("battleMessage").textContent =
+        "🌿 야생의 " +
+        currentEnemy.name +
+        "이(가) 나타났다!";
 }
-
-
-/* ==================================================
-   야생 포켓몬 선택
-================================================== */
-
 function encounterPokemon() {
 
     /*
@@ -1584,33 +1647,24 @@ function throwBall() {
 
         setTimeout(function() {
 
-            endBattle();
+function endBattle() {
 
-        }, 1000);
+    inBattle = false;
 
-    }
+    currentEnemy = null;
 
-    else {
+    /*
+    다음 배틀을 위해 버튼 상태 초기화
+    */
 
-        document.getElementById("battleMessage").textContent =
-            "😮 " +
-            currentEnemy.name +
-            "이(가) 포켓몬볼에서 빠져나왔습니다!";
+    enableBattleButtons();
 
+    showScreen("exploreScreen");
 
-        disableBattleButtons();
+    drawMap();
 
-        setTimeout(enemyAttack, 800);
-
-    }
-
+    updateUI();
 }
-
-
-/* ==================================================
-   회복약
-================================================== */
-
 function usePotion() {
 
     if(!inBattle) return;
